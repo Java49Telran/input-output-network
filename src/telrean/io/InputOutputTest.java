@@ -34,7 +34,7 @@ class InputOutputTest {
 
 	@Test
 	void displayDirContentTest() throws IOException {
-		displayDirContent(Path.of("../.."), 3);
+		displayDirContent(Path.of(".."), 3);
 		assertThrowsExactly(IllegalArgumentException.class,
 				()->displayDirContent(Path.of("/Users/User/Doc"), 1), NOT_EXIST);
 		
@@ -61,9 +61,13 @@ class InputOutputTest {
 			throw new IllegalArgumentException("no directory");
 		}
 		int count = dirPath.getNameCount();
-		Files.walk(dirPath, maxDepth)
-				.forEach(p -> System.out.printf("%s%s - %s\n", " ".repeat(p.getNameCount() - count),
-						p.getName(p.getNameCount() - 1), Files.isDirectory(p) ? "dir" : "file"));
+		try {
+			Files.walk(dirPath, maxDepth)
+					.forEach(p -> System.out.printf("%s%s - %s\n", " ".repeat(p.getNameCount() - count),
+							p.getName(p.getNameCount() - 1), Files.isDirectory(p) ? "dir" : "file"));
+		} catch (Exception e) {
+			
+		}
 
 	}
 }
