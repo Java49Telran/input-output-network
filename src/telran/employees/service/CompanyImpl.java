@@ -32,6 +32,14 @@ public class CompanyImpl implements Company {
 	private <T> void addToIndex(Employee empl, T key, Map<T, Collection<Employee>> map) {
 		map.computeIfAbsent(key, k -> new HashSet<>()).add(empl);
 	}
+	private <T> void removeFromIndex(Employee empl, T key, Map<T, Collection<Employee>> map) {
+
+		Collection<Employee> employeesCol = map.get(key);
+		employeesCol.remove(empl);
+		if (employeesCol.isEmpty()) {
+			map.remove(key);
+		}
+	}
 
 	private void addEmployeeSalary(Employee empl) {
 		addToIndex(empl, empl.salary(), employeesSalary);
@@ -59,14 +67,7 @@ public class CompanyImpl implements Company {
 		return res;
 	}
 
-	private <T> void removeFromIndex(Employee empl, T key, Map<T, Collection<Employee>> map) {
-
-		Collection<Employee> employeesCol = map.get(key);
-		employeesCol.remove(empl);
-		if (employeesCol.isEmpty()) {
-			employeesSalary.remove(key);
-		}
-	}
+	
 
 	private void removeEmployeeSalary(Employee empl) {
 		int salary = empl.salary();
