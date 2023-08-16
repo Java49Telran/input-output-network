@@ -32,6 +32,7 @@ public class ConsoleInputOutput {
 		boolean running = false;
 		T res = null;
 		do {
+			running = false;
 			String resInput = readString(prompt);
 			try {
 				res = mapper.apply(resInput);
@@ -66,37 +67,62 @@ public class ConsoleInputOutput {
 	}
 
 	public long readLong(String prompt, String errorPrompt) {
-		// TODO
-		return 0;
+		
+		return readObject(prompt, errorPrompt, Long::parseLong);
 	}
 
 	public long readLong(String prompt, String errorPrompt, long min, long max) {
-		// TODO
-		return 0;
+		return readObject(String.format("%s[%d - %d] ", prompt, min, max), errorPrompt,
+				string -> {
+
+			long res = Long.parseLong(string);
+			if (res < min) {
+				throw new IllegalArgumentException("must be not less than " + min);
+			}
+			if (res > max) {
+				throw new IllegalArgumentException("must be not greater than " + max);
+			}
+			return res;
+
+		});
 	}
 
 	public String readString(String prompt, String errorPrompt, Predicate<String> predicate) {
-		// TODO
-		return "";
+		
+		return readObject(prompt, errorPrompt, string -> {
+			if(!predicate.test(string)) {
+				throw new IllegalArgumentException("");
+			}
+			return string;
+		});
 	}
 
-	public String readString(String prompt, String errorPrompt, Set<String> options) {
-		// TODO
-		return "";
+	public String readString(String prompt, String errorPrompt,
+			Set<String> options) {
+		
+		return readString(prompt, errorPrompt, options::contains);
 	}
 
 	public LocalDate readDate(String prompt, String errorPrompt) {
-		// TODO
-		return null;
+		
+		return readObject(prompt, errorPrompt, LocalDate::parse);
 	}
 
-	public LocalDate readDate(String prompt, String errorPrompt, LocalDate from, LocalDate to) {
-		// TODO
-		return null;
+	public LocalDate readDate(String prompt, String errorPrompt,
+			LocalDate from, LocalDate to) {
+		
+		return readObject(prompt, errorPrompt, string -> {
+			LocalDate res = LocalDate.parse(string);
+			if(res.isBefore(from) || res.isAfter(to)) {
+				throw new IllegalArgumentException
+				(String.format("Date should be in the range from %s to %s", from, to));
+			}
+			return res;
+		});
 	}
 
 	public double readDouble(String prompt, String errorPrompt) {
-		// TODO
-		return 0;
+		
+		return readObject(prompt, errorPrompt, Double::parseDouble);
 	}
 }
