@@ -49,12 +49,22 @@ static Company company;
 				MIN_ID, MAX_ID);
 		Employee empl = company.getEmployee(id);
 		
-		return (empl != null && isExists) || (empl == null && !isExists) ? id : null;
+		String exceptionText = "";
+		Long res = (empl != null && isExists) || (empl == null && !isExists) ?
+				id : null;
+		if(res == null ) {
+			exceptionText = isExists ? String.format("Employee with id %d doesn't exist", id)
+					: String.format("Employee with id %d already exists", id);
+		} 
+		if (!exceptionText.isEmpty()) {
+			throw new RuntimeException(exceptionText);
+		}
+		return res;
 		
 	}
-	static private  <T> void displayList(List<T> list, InputOutput io) {
+	static private  <T> void displayResult(List<T> list, InputOutput io) {
 		if(list.isEmpty()) {
-			io.writeLine("No data mathing the request");
+			io.writeLine("No data matching the request");
 		}
 		list.forEach(io::writeLine);
 	}
@@ -63,9 +73,7 @@ static Company company;
 	}));
 	static void addEmployeeItem(InputOutput io) {
 		Long id = getId(io, false);
-		if (id == null) {
-			throw new RuntimeException("Employee with entered ID already exists");
-		}
+		
 		String name = io.readString("Enter name", "Wrong name",
 				str -> str.matches("[A-Z][a-z]+"));
 		String department = getDepartment(io);
@@ -85,39 +93,35 @@ static Company company;
 	}
 	static void removeEmployeeItem(InputOutput io) {
 		Long id = getId(io, true);
-		if (id == null) {
-			throw new RuntimeException("Employee with entered ID doesn't exist");
-		}
+		
 		io.write("Removed employee is ");
 		io.writeLine(company.removeEmployee(id));
 	}
 	static void getEmployeeItem(InputOutput io) {
 		Long id = getId(io, true);
-		if (id == null) {
-			throw new RuntimeException("Employee with entered ID doesn't exist");
-		}
+		
 		io.write("employee is ");
 		io.writeLine(company.getEmployee(id));
 	}
 	static void getEmployeesItem(InputOutput io) {
-		displayList(company.getEmployees(), io);
+		displayResult(company.getEmployees(), io);
 	}
 	static void getDepartmentSalaryDistributionItem(InputOutput io) {
-		displayList(company.getDepartmentSalaryDistribution(), io);
+		displayResult(company.getDepartmentSalaryDistribution(), io);
 		
 	}
 	static void getSalaryDistributionItem(InputOutput io) {
 		int interval = io.readInt("Enter salary distribution interval" , "Wrong interval",
 				MIN_INTERVAL, MAX_INTERVAL);
-		displayList(company.getSalaryDistribution(interval), io);
+		displayResult(company.getSalaryDistribution(interval), io);
 	}
 	static void getEmployeesByDepartmentItem(InputOutput io) {
 		String department = getDepartment(io);
-		displayList(company.getEmployeesByDepartment(department), io);
+		displayResult(company.getEmployeesByDepartment(department), io);
 	}
 	static void getEmployeesBySalaryItem(InputOutput io) {
 		int[] fromTo = getSalaries(io);
-		displayList(company.getEmployeesBySalary(fromTo[0], fromTo[1]), io);
+		displayResult(company.getEmployeesBySalary(fromTo[0], fromTo[1]), io);
 	}
 	private static int[] getSalaries(InputOutput io) {
 		int from = io.readInt("Enter salary from", "Wrong salary-from value", MIN_SALARY,
@@ -127,7 +131,7 @@ static Company company;
 	}
 	static void getEmployeesByAgeItem(InputOutput io) {
 		int [] fromTo = getAgies(io);
-		displayList(company.getEmployeesByAge(fromTo[0], fromTo[1]), io);
+		displayResult(company.getEmployeesByAge(fromTo[0], fromTo[1]), io);
 	}
 	private static int[] getAgies(InputOutput io) {
 		int from = io.readInt("Enter age from", "Wrong age-from value", MIN_AGE, MAX_AGE - 1);
@@ -136,9 +140,7 @@ static Company company;
 	}
 	static void updateSalaryItem(InputOutput io) {
 		Long id = getId(io, true);
-		if(id == null) {
-			throw new RuntimeException("Employee with entered ID doesn't exist");
-		}
+		
 		int salary = io.readInt("Enter new salary value", "Wrong salary value",
 				MIN_SALARY, MAX_SALARY);
 		Employee empl = company.updateSalary(id, salary);
@@ -148,9 +150,7 @@ static Company company;
 	}
 	static void updateDepartmentItem(InputOutput io) {
 		Long id = getId(io, true);
-		if(id == null) {
-			throw new RuntimeException("Employee with entered ID doesn't exist");
-		}
+		
 		String department = getDepartment(io);
 		Employee empl = company.updateDepartment(id, department);
 		io.writeLine(String.format("old deprtment %s of employee %d"
