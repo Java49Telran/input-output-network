@@ -19,6 +19,8 @@ private static final int MIN_SALARY = 6000;
 private static final int MAX_SALARY = 50000;
 private static final int MAX_AGE = 75;
 private static final int MIN_AGE = 20;
+private static final int MIN_INTERVAL = 500;
+private static final int MAX_INTERVAL = 5000;
 static Company company;
 	public static ArrayList<Item> getCompanyItems(Company company) {
 		CompanyController.company = company;
@@ -42,14 +44,31 @@ static Company company;
 				Item.of("Update Department", CompanyController::updateDepartmentItem)
 		};
 	}
+	static private Long getId(InputOutput io, boolean isExists) {
+		Long id = io.readLong("Enter Employee identity", "Wrong identity value",
+				MIN_ID, MAX_ID);
+		Employee empl = company.getEmployee(id);
+		
+		return (empl != null && isExists) || (empl == null && !isExists) ? id : null;
+		
+	}
+	static private  <T> void displayList(List<T> list, InputOutput io) {
+		if(list.isEmpty()) {
+			io.writeLine("No data mathing the request");
+		}
+		list.forEach(io::writeLine);
+	}
 	static private Set<String> departments = new HashSet<>(Arrays.asList(new String[] {
 			"QA", "Development", "Audit", "Management", "Accounting"
 	}));
 	static void addEmployeeItem(InputOutput io) {
-		long id = io.readLong("Enter Employee identity", "Wrong identity value", MIN_ID, MAX_ID);
+		Long id = getId(io, false);
+		if (id == null) {
+			throw new RuntimeException("Employee with entered ID already exists");
+		}
 		String name = io.readString("Enter name", "Wrong name",
 				str -> str.matches("[A-Z][a-z]+"));
-		String department = io.readString("Enter department", "Wrong department", departments );
+		String department = getDepartment(io);
 		int salary = io.readInt("Enter salary", "Wrong salary", MIN_SALARY, MAX_SALARY);
 		LocalDate birthDate = io.readDate("Enter birth data", "Wrong birth date entered",
 				getBirthdate(MAX_AGE), getBirthdate(MIN_AGE));
@@ -57,40 +76,86 @@ static Company company;
 		io.writeLine(res ? String.format("Employee with id %d has been added", id) : 
 			String.format("Employee with id %d already exists", id));
 	}
+	private static String getDepartment(InputOutput io) {
+		return io.readString("Enter department " + departments, "Wrong department", departments );
+	}
 	private static LocalDate getBirthdate(int age) {
 		
 		return LocalDate.now().minusYears(age);
 	}
 	static void removeEmployeeItem(InputOutput io) {
-		//TODO
+		Long id = getId(io, true);
+		if (id == null) {
+			throw new RuntimeException("Employee with entered ID doesn't exist");
+		}
+		io.write("Removed employee is ");
+		io.writeLine(company.removeEmployee(id));
 	}
 	static void getEmployeeItem(InputOutput io) {
-		//TODO
+		Long id = getId(io, true);
+		if (id == null) {
+			throw new RuntimeException("Employee with entered ID doesn't exist");
+		}
+		io.write("employee is ");
+		io.writeLine(company.getEmployee(id));
 	}
 	static void getEmployeesItem(InputOutput io) {
-		//TODO
+		displayList(company.getEmployees(), io);
 	}
 	static void getDepartmentSalaryDistributionItem(InputOutput io) {
-		company.getDepartmentSalaryDistribution().forEach(io::writeLine);
+		displayList(company.getDepartmentSalaryDistribution(), io);
 		
 	}
 	static void getSalaryDistributionItem(InputOutput io) {
-		//TODO
+		int interval = io.readInt("Enter salary distribution interval" , "Wrong interval",
+				MIN_INTERVAL, MAX_INTERVAL);
+		displayList(company.getSalaryDistribution(interval), io);
 	}
 	static void getEmployeesByDepartmentItem(InputOutput io) {
-		//TODO
+		String department = getDepartment(io);
+		displayList(company.getEmployeesByDepartment(department), io);
 	}
 	static void getEmployeesBySalaryItem(InputOutput io) {
-		//TODO
+		int[] fromTo = getSalaries(io);
+		displayList(company.getEmployeesBySalary(fromTo[0], fromTo[1]), io);
+	}
+	private static int[] getSalaries(InputOutput io) {
+		int from = io.readInt("Enter salary from", "Wrong salary-from value", MIN_SALARY,
+				MAX_SALARY - 1);
+		int to =  io.readInt("Enter salary to", "Wrong salary-to value", from, MAX_SALARY);
+		return new int[] {from, to};
 	}
 	static void getEmployeesByAgeItem(InputOutput io) {
-		//TODO
+		int [] fromTo = getAgies(io);
+		displayList(company.getEmployeesByAge(fromTo[0], fromTo[1]), io);
+	}
+	private static int[] getAgies(InputOutput io) {
+		int from = io.readInt("Enter age from", "Wrong age-from value", MIN_AGE, MAX_AGE - 1);
+		int to =  io.readInt("Enter age to", "Wrong age-to value", from, MAX_AGE);
+		return new int[] {from, to};
 	}
 	static void updateSalaryItem(InputOutput io) {
-		//TODO
+		Long id = getId(io, true);
+		if(id == null) {
+			throw new RuntimeException("Employee with entered ID doesn't exist");
+		}
+		int salary = io.readInt("Enter new salary value", "Wrong salary value",
+				MIN_SALARY, MAX_SALARY);
+		Employee empl = company.updateSalary(id, salary);
+		io.writeLine(String.format("old salary value %d of employee %d"
+				+ " has been updated with new value %d", empl.salary(),
+				empl.id(), salary));
 	}
 	static void updateDepartmentItem(InputOutput io) {
-		//TODO
+		Long id = getId(io, true);
+		if(id == null) {
+			throw new RuntimeException("Employee with entered ID doesn't exist");
+		}
+		String department = getDepartment(io);
+		Employee empl = company.updateDepartment(id, department);
+		io.writeLine(String.format("old deprtment %s of employee %d"
+				+ " has been updated with department %s", empl.department(),
+				empl.id(), department));
 	}
 	
 	
