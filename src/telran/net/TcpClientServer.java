@@ -62,10 +62,10 @@ public class TcpClientServer implements Runnable {
 				+ e.getMessage());
 					break;
 				}
-				tcpServer.clientsCounter.decrementAndGet();
+				
 				
 			}
-			
+			tcpServer.clientsCounter.decrementAndGet();
 		
 
 	}
