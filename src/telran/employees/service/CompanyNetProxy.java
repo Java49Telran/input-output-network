@@ -39,7 +39,7 @@ public class CompanyNetProxy implements Company {
 	@Override
 	public List<Employee> getEmployees() {
 		
-		return tcpHandler.send("employees/get", null);
+		return tcpHandler.send("employees_get", null);
 	}
 
 	@Override
